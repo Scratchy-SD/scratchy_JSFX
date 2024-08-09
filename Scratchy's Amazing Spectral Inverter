@@ -1,0 +1,58 @@
+desc:Spectral Inverter
+
+//slider1:gain_db=0<-150,12,1>Gain (dB)
+slider4:Freq=0<0,6,1{Half, Quarter, Eights, Sixteenths, Thirtyseconds, SixtyFourths, HundredTwentyEights}>Inversion Center
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+  
+@init
+//last_gain=10^(gain_db/20);
+flip_flop = 0;
+count = 0;
+limit = 1;
+
+@slider
+//next_gain=10^(gain_db/20);
+Freq == 0 ? (
+    limit = 1;
+) : Freq == 1 ? (
+    limit = 2;
+) : Freq == 2 ? (
+    limit = 4;
+) : Freq == 3 ? (
+    limit = 8;
+) : Freq == 4 ? (
+    limit = 16;
+) : Freq == 5 ? (
+    limit = 32;
+) : Freq == 6 ? (
+    limit = 64;
+) : (limit = 1;);
+
+
+@block
+//d_gain = (next_gain - last_gain)/samplesblock;
+
+@sample
+spl0 = spl0 * (-1)^flip_flop;
+spl1 = spl1 * (-1)^flip_flop;
+//last_gain += d_gain;
+
+//flip_flop == 0 ? (
+//  flip_flop = 1;
+//) : flip_flop == 1 ? (
+//  flip_flop = 0;
+//) : ( 
+//  "this shoulden't happen";
+//);
+count = count + 1;
+
+count == limit ? (
+  flip_flop = !flip_flop;
+  count = 0;
+) : (
+"nothing";
+);
